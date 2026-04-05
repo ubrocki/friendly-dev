@@ -41,7 +41,8 @@ export async function clientLoader({
   // Temporary artificial delay so HydrateFallback is visible during development.
   await delay(1500, request.signal);
 
-  const response = await fetch(`http://localhost:8000/projects/${id}`, {
+  const projectsUrl = import.meta.env.VITE_API_URL + "/projects";
+  const response = await fetch(`${projectsUrl}/${id}`, {
     signal: request.signal,
   });
 
