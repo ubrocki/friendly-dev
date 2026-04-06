@@ -84,7 +84,7 @@ const ContactPage = ({ actionData }: Route.ComponentProps) => {
             name="name"
             defaultValue={actionData?.values?.name ?? ""}
             className={`mt-1 block w-full px-3 py-2 bg-gray-800 border rounded-md text-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              actionData?.errors?.name ? "border-red-500" : "border-gray-700"
+              actionData?.errors?.name ? "border-red-500" : "border-gray-500"
             }`}
           />
           {actionData?.errors?.name ? (
@@ -106,7 +106,7 @@ const ContactPage = ({ actionData }: Route.ComponentProps) => {
             name="email"
             defaultValue={actionData?.values?.email ?? ""}
             className={`mt-1 block w-full px-3 py-2 bg-gray-800 border rounded-md text-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              actionData?.errors?.email ? "border-red-500" : "border-gray-700"
+              actionData?.errors?.email ? "border-red-500" : "border-gray-500"
             }`}
           />
           {actionData?.errors?.email ? (
@@ -128,7 +128,7 @@ const ContactPage = ({ actionData }: Route.ComponentProps) => {
             name="subject"
             defaultValue={actionData?.values?.subject ?? ""}
             className={`mt-1 block w-full px-3 py-2 bg-gray-800 border rounded-md text-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              actionData?.errors?.subject ? "border-red-500" : "border-gray-700"
+              actionData?.errors?.subject ? "border-red-500" : "border-gray-500"
             }`}
           />
           {actionData?.errors?.subject ? (
@@ -150,7 +150,7 @@ const ContactPage = ({ actionData }: Route.ComponentProps) => {
             rows={4}
             defaultValue={actionData?.values?.message ?? ""}
             className={`mt-1 block w-full px-3 py-2 bg-gray-800 border rounded-md text-gray-200 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
-              actionData?.errors?.message ? "border-red-500" : "border-gray-700"
+              actionData?.errors?.message ? "border-red-500" : "border-gray-500"
             }`}
           ></textarea>
           {actionData?.errors?.message ? (
