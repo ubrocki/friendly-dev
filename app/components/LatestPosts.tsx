@@ -1,8 +1,8 @@
-import type { PostMeta } from "~/types";
+import type { Post } from "~/types";
 import PostCard from "./PostCard";
 
 interface LatestPostsProps {
-  posts: PostMeta[];
+  posts: Post[];
   limit?: number;
 }
 

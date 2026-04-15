@@ -4,16 +4,23 @@ import ProjectCard from "./ProjectCard";
 
 interface FeaturedProjectsProps {
   featuredProjects: Project[];
-  count: number;
 }
 
 const FeaturedProjects: FC<FeaturedProjectsProps> = ({
   featuredProjects: projects,
-  count = 4,
 }) => {
+  if (projects.length === 0) {
+    return null; // Don't render anything if there are no featured projects
+  }
+
   return (
     <section>
-      <h2 className="text-2xl font-bold mb-6 text-gray-400"></h2>
+      <h2 className="mb-6 flex items-center justify-center text-2xl font-bold text-gray-400">
+        <span aria-hidden="true" className="mr-2 text-yellow-400">
+          &#9733;
+        </span>
+        Featured Projects
+      </h2>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {projects.map((project) => (
           <ProjectCard key={project.id} project={project} />

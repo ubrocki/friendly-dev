@@ -1,4 +1,9 @@
-import type { Project } from "~/types";
+import {
+  strapiProjectToProject,
+  type Project,
+  type StrapiProject,
+  type StrapiResponse,
+} from "~/types";
 import type { Route } from "./+types";
 import ProjectCard from "~/components/ProjectCard";
 import axios from "axios";
@@ -10,12 +15,20 @@ export async function loader({
   request,
 }: Route.LoaderArgs): Promise<{ projects: Project[] }> {
   try {
-    const projectsUrl = import.meta.env.VITE_API_URL + "/projects";
-    const response = await axios.get<Project[]>(projectsUrl, {
-      signal: request.signal,
-    });
+    const projectsUrl = import.meta.env.VITE_API_URL + "/projects?populate=*";
 
-    return { projects: response.data };
+    const response = await axios.get<StrapiResponse<StrapiProject>>(
+      projectsUrl,
+      {
+        signal: request.signal,
+      },
+    );
+
+    const projects: Project[] = response.data.data.map((item: StrapiProject) =>
+      strapiProjectToProject(item, import.meta.env.VITE_STRAPI_URL),
+    );
+
+    return { projects };
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Response("Failed to load projects", {
@@ -69,7 +82,7 @@ const ProjectsPage = ({ loaderData }: Route.ComponentProps) => {
   );
 
   return (
-    <>
+    <section className="max-w-4xl mx-auto mt-12 px-6 py-8 bg-gray-900 rounded-xl">
       <h2 className="text-3xl font-bold text-gray-400 mb-8 text-center">
         💼 Projects
       </h2>
@@ -105,7 +118,7 @@ const ProjectsPage = ({ loaderData }: Route.ComponentProps) => {
         totalPages={totalPages}
         onPageChange={setCurrentPage}
       />
-    </>
+    </section>
   );
 };
 

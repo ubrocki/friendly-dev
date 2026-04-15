@@ -1,8 +1,8 @@
 import { Link } from "react-router";
-import type { PostMeta } from "~/types";
+import type { Post } from "~/types";
 
 type PostCardProps = {
-  post: PostMeta;
+  post: Post;
   showExcerpt?: boolean;
 };
 
@@ -24,6 +24,13 @@ const PostCard = ({ post, showExcerpt = true }: PostCardProps) => {
       <h3 className="text-xl font-semibold text-blue-400">{post.title}</h3>
       {showExcerpt && (
         <p className="mt-2 text-gray-300 leading-relaxed">{post.excerpt}</p>
+      )}
+      {post.image && (
+        <img
+          src={post.image}
+          alt={post.title}
+          className="mt-4 w-full h-48 object-cover rounded mb-4"
+        />
       )}
       <Link
         to={`/blog/${post.slug}`}

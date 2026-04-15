@@ -1,5 +1,10 @@
 import type { Route } from "./+types";
-import type { PostMeta } from "~/types";
+import {
+  strapiPostToPostMeta,
+  type Post,
+  type StrapiPost,
+  type StrapiResponse,
+} from "~/types";
 import PostCard from "~/components/PostCard";
 import { useState } from "react";
 import Pagination from "~/components/Pagination";
@@ -7,9 +12,15 @@ import PostFilter from "~/components/PostFilter";
 
 export async function loader({
   request,
-}: Route.LoaderArgs): Promise<{ posts: PostMeta[] }> {
-  const url = new URL("/posts-meta.json", request.url);
-  const res = await fetch(url.href);
+}: Route.LoaderArgs): Promise<{ posts: Post[] }> {
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/posts?populate=image&sort=date:desc`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
 
   if (!res.ok) {
     throw new Error(
@@ -17,14 +28,13 @@ export async function loader({
     );
   }
 
-  const data = await res.json();
-  data.sort((a: PostMeta, b: PostMeta) => {
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
-    return dateB - dateA; // Sort by date descending
+  const json: StrapiResponse<StrapiPost> = await res.json();
+
+  const posts = json.data.map((item) => {
+    return strapiPostToPostMeta(item, import.meta.env.VITE_STRAPI_URL);
   });
 
-  return { posts: data };
+  return { posts };
 }
 
 const BlogPage = ({ loaderData }: Route.ComponentProps) => {

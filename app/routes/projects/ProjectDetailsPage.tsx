@@ -1,4 +1,9 @@
-import type { Project } from "~/types";
+import {
+  strapiProjectToProject,
+  type Project,
+  type StrapiProject,
+  type StrapiResponse,
+} from "~/types";
 import type { Route } from "./+types/ProjectDetailsPage";
 import { Link } from "react-router";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
@@ -29,9 +34,9 @@ export async function clientLoader({
   request,
   params,
 }: Route.ClientLoaderArgs): Promise<Project> {
-  const { id } = params;
+  const { id: documentId } = params;
 
-  if (!id) {
+  if (!documentId) {
     throw new Response("Project id is required", {
       status: 400,
       statusText: "Bad Request",
@@ -42,9 +47,12 @@ export async function clientLoader({
   await delay(1500, request.signal);
 
   const projectsUrl = import.meta.env.VITE_API_URL + "/projects";
-  const response = await fetch(`${projectsUrl}/${id}`, {
-    signal: request.signal,
-  });
+  const response = await fetch(
+    `${projectsUrl}?filters[documentId][$eq]=${documentId}&populate=*`,
+    {
+      signal: request.signal,
+    },
+  );
 
   if (!response.ok) {
     throw new Response("Failed to load project", {
@@ -53,8 +61,18 @@ export async function clientLoader({
     });
   }
 
-  const project = (await response.json()) as Project;
-  return project;
+  const json: StrapiResponse<StrapiProject> = await response.json();
+
+  const item = json.data[0];
+
+  if (!item) {
+    throw new Response("Project not found", {
+      status: 404,
+      statusText: "Not Found",
+    });
+  }
+
+  return strapiProjectToProject(item, import.meta.env.VITE_STRAPI_URL);
 }
 
 export function HydrateFallback() {
@@ -71,7 +89,7 @@ const ProjectDetailsPage = ({ loaderData }: Route.ComponentProps) => {
   const project = loaderData as Project;
 
   return (
-    <>
+    <section className="max-w-4xl mx-auto mt-12 px-6 py-8 bg-gray-900 rounded-xl">
       <Link
         to={`/projects`}
         className="flex items-center text-blue-400 hover:text-blue-500 mb-6 transition"
@@ -106,7 +124,7 @@ const ProjectDetailsPage = ({ loaderData }: Route.ComponentProps) => {
           </a>
         </div>
       </div>
-    </>
+    </section>
   );
 };
 

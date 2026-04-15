@@ -1,20 +1,26 @@
 import ReactMarkdown from "react-markdown";
-import type { PostMeta } from "~/types";
+import {
+  strapiPostToPostMeta,
+  type Post,
+  type StrapiPost,
+  type StrapiResponse,
+} from "~/types";
 import type { Route } from "./+types/BlogDetailsPage";
 import { Link } from "react-router";
 
 export async function loader({
   request,
   params,
-}: Route.LoaderArgs): Promise<{ postMeta: PostMeta; markdown: string }> {
+}: Route.LoaderArgs): Promise<{ post: Post }> {
   const { slug } = params;
 
   if (!slug) {
     throw new Response("Slug is required", { status: 400 });
   }
 
-  const url = new URL(`/posts-meta.json`, request.url);
-  const res = await fetch(url.href);
+  const res = await fetch(
+    `${import.meta.env.VITE_API_URL}/posts?filters[slug][$eq]=${slug}&populate=image`,
+  );
 
   if (!res.ok) {
     throw new Error(
@@ -22,36 +28,42 @@ export async function loader({
     );
   }
 
-  const posts: PostMeta[] = await res.json();
-  const postMeta = posts.find((p) => p.slug === slug);
+  const json: StrapiResponse<StrapiPost> = await res.json();
 
-  if (!postMeta) {
+  if (json.data.length === 0) {
     throw new Response("Post not found", { status: 404 });
   }
 
-  // Dynamically import the markdown content for the post
-  const md = await import(`../../posts/${slug}.md?raw`);
-  return { postMeta, markdown: md.default as string };
+  const postMeta = strapiPostToPostMeta(
+    json.data[0],
+    import.meta.env.VITE_STRAPI_URL,
+  );
+
+  return { post: postMeta };
 }
 
 const BlogDetailsPage = ({ loaderData }: Route.ComponentProps) => {
-  const { postMeta, markdown } = loaderData;
+  const { post } = loaderData;
 
   return (
     <section className="max-w-3xl mx-auto mt-12 px-6 py-8 bg-gray-900 rounded-xl">
-      <h1 className="text-4xl font-bold text-blue-400 mb-4">
-        {postMeta.title}
-      </h1>
+      <h1 className="text-4xl font-bold text-blue-400 mb-4">{post.title}</h1>
       <p className="text-sm uppercase tracking-wide text-gray-400 mb-8">
-        {new Date(postMeta.date).toLocaleDateString("en-US", {
+        {new Date(post.date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
         })}
       </p>
 
+      <img
+        src={post.image}
+        alt={post.title}
+        className="w-full h-auto rounded-lg mb-8 object-cover"
+      />
+
       <div className="max-w-none mb-12 text-gray-400 prose prose-invert">
-        <ReactMarkdown>{markdown}</ReactMarkdown>
+        <ReactMarkdown>{post.body}</ReactMarkdown>
       </div>
 
       <Link
